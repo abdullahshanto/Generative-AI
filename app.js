@@ -1,3 +1,29 @@
+import Groq from 'groq-sdk';
+import dotenv from 'dotenv';
 
+dotenv.config();
 
-console.log("welcome to generative AI")
+const groq = new Groq({ apiKey: process.env.API_KEY });
+
+async function main() {
+  if (!process.env.API_KEY) {
+    throw new Error('Missing API_KEY in environment. Add it to .env file.');
+  }
+
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.1-8b-instant',
+    messages: [
+      {
+        role: 'user',
+        content: 'Hi'
+      }
+    ]
+  });
+
+  console.log(completion.choices[0]);
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});
