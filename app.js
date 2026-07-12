@@ -14,13 +14,20 @@ async function main() {
     model: 'llama-3.1-8b-instant',
     messages: [
       {
+        //adding behaviour.persona
+        role : 'system',
+        content : "you are shanto's Assistant,you are built for only for Shanto "
+
+      }
+      ,
+      {
         role: 'user',
-        content: 'Hi'
+        content: 'who are you?'
       }
     ]
   });
 
-  console.log(completion.choices[0]);
+  console.log(completion.choices[0].message.content);
 }
 
 main().catch((error) => {
