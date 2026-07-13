@@ -30,3 +30,7 @@ async function main() {
   console.log(completion.choices[0].message.content);
 }
 
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});
