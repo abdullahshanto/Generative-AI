@@ -12,6 +12,19 @@ async function main() {
     throw new Error('Missing API_KEY in environment. Add it to .env file.');
   }
 
+  const messages = [
+    {
+      role: 'system',
+      content: `you are shanto's Assistant, you are built for only for Shanto.
+      You have access to the "web_search" tool to search the web for information.
+      Use it when you need current or external information.`
+    },
+    {
+      role: 'user',
+      content: `today who won?argentina or englang?`
+    }
+  ];
+
   const completion = await groq.chat.completions.create({
     model: 'llama-3.1-8b-instant',
     temperature: 0,
@@ -27,10 +40,6 @@ async function main() {
               query: {
                 type: "string",
                 description: "the search query to perform search on"
-              },
-              unit: {
-                type: "string",
-                enum: ["celsius", "fahrenheit"]
               }
             },
             required: ["query"]
@@ -39,27 +48,16 @@ async function main() {
       }
     ],
     tool_choice: 'auto',
-    messages: [
-      {
-        role: 'system',
-        content: `you are shanto's Assistant,you are built for only for Shanto.
-        Return the answer as JSON.
-
-        You have access to following tools
-        `
-      },
-      {
-        role: 'user',
-        content: `when was iphone 16 pro max launched?`
-      }
-    ]
+    messages: messages
   });
 
-  const message = completion.choices[0].message;
-  const toolCalls = message.tool_calls;
+  const assistantMessage = completion.choices[0].message;
+  messages.push(assistantMessage);
+
+  const toolCalls = assistantMessage.tool_calls;
 
   if (!toolCalls) {
-    console.log(`assistant: ${message.content}`);
+    console.log(`assistant: ${assistantMessage.content}`);
     return;
   }
 
@@ -68,33 +66,22 @@ async function main() {
       const args = JSON.parse(toolCall.function.arguments);
       const result = await web_search(args);
 
-      const secondCompletion = await groq.chat.completions.create({
-        model: 'llama-3.1-8b-instant',
-        temperature: 0,
-        messages: [
-          {
-            role: 'system',
-            content: `you are shanto's Assistant,you are built for only for Shanto.
-            Return the answer as JSON.
-            You have access to following tools
-            `
-          },
-          {
-            role: 'user',
-            content: `when was iphone 16 pro max launched?`
-          },
-          message,
-          {
-            role: 'tool',
-            tool_call_id: toolCall.id,
-            content: result
-          }
-        ]
+      messages.push({
+        tool_call_id: toolCall.id,
+        role: 'tool',
+        name: toolCall.function.name,
+        content: result
       });
-
-      console.log(JSON.stringify(secondCompletion.choices[0].message, null, 2));
     }
   }
+
+  const secondCompletion = await groq.chat.completions.create({
+    model: 'llama-3.1-8b-instant',
+    temperature: 0,
+    messages: messages
+  });
+
+  console.log(secondCompletion.choices[0].message.content);
 }
 
 main().catch((error) => {
@@ -103,8 +90,7 @@ main().catch((error) => {
 });
 
 async function web_search({ query }) {
-  //console.log("calling");
- const response = await tvly.search(query , /*{max_results:1}*/);
-
-     console.log(response);
+  const response = await tvly.search(query);
+  const finalResult = response.results.map((result) => result.content).join('\n\n');
+  return finalResult;
 }
