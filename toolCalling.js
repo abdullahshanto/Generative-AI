@@ -1,9 +1,11 @@
 import Groq from 'groq-sdk';
 import dotenv from 'dotenv';
+import {tavily} from '@tavily/core'
 
 dotenv.config();
 
 const groq = new Groq({ apiKey: process.env.API_KEY });
+const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
 
 async function main() {
   if (!process.env.API_KEY) {
@@ -102,5 +104,7 @@ main().catch((error) => {
 
 async function web_search({ query }) {
   //console.log("calling");
-  return "iphone 16 was launched on 20 sep,2024";
+ const response = await tvly.search(query , /*{max_results:1}*/);
+
+     console.log(response);
 }
