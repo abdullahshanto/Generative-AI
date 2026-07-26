@@ -95,10 +95,4 @@ After you get search results, answer based on those results. Do not call web_sea
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+ 
