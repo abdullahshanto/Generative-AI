@@ -56,11 +56,3 @@ async function sendMessage() {
 
   setLoading(false);
 }
-
-sendBtn.addEventListener('click', sendMessage);
-userInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
