@@ -38,21 +38,4 @@ async function sendMessage() {
   try {
     const res = await fetch("/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      addMessage("assistant", `Error: ${data.error}`);
-    } else {
-      addMessage("assistant", data.reply);
-      messages.push({ role: "assistant", content: data.reply });
-    }
-  } catch (err) {
-    addMessage("assistant", "Network error. Is the server running?");
-  }
-
-  setLoading(false);
-}
+    
